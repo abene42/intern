@@ -13,12 +13,17 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
   late final Animation<double> opacity;
   late final Animation<EdgeInsets> textAlignment;
   late AnimationController _controller;
+  late FocusNode _focusNode;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
+    //Focus node for the text field
+    _focusNode = FocusNode();
+
+    // Animation Controller
     _controller = AnimationController(
         duration: const Duration(milliseconds: 800), vsync: this);
 
@@ -73,6 +78,7 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
     // TODO: implement dispose
     super.dispose();
     _controller.dispose();
+    _focusNode.dispose();
   }
 
   @override
@@ -155,6 +161,7 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
                 borderRadius: BorderRadius.circular(40),
               ),
               child: TextFormField(
+                focusNode: _focusNode,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
@@ -162,6 +169,8 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
                   suffixIcon: IconButton(
                     color: Color(0xffA3A3A3),
                     icon: Icon(Icons.search),
+                    splashColor: Colors.transparent,
+                    splashRadius: 0.1,
                     onPressed: () {
                       isSearching
                           ? _playAnimationReverse()
@@ -199,6 +208,7 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
 
   Future<void> _playAnimationForward() async {
     try {
+      _focusNode.requestFocus();
       await _controller.forward().orCancel;
       setState(() {
         isSearching = true;
@@ -214,6 +224,7 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
       setState(() {
         isSearching = false;
       });
+      _focusNode.unfocus();
     } on TickerCanceled {
       // the animation got canceled, probably because it was disposed of
     }

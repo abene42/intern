@@ -16,6 +16,7 @@ class _SearchPageState extends State<SearchPage> {
     return ColorfulSafeArea(
       color: Colors.white,
       child: Scaffold(
+        extendBody: true,
         backgroundColor: Colors.white,
         body: SingleChildScrollView(
           child: Column(
@@ -50,19 +51,33 @@ class _SearchPageState extends State<SearchPage> {
         ),
         resizeToAvoidBottomInset: true,
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          type: BottomNavigationBarType.fixed,
           selectedItemColor: Colors.blueAccent,
-          unselectedItemColor: Colors.blueGrey,
-          items: [
+          unselectedItemColor: Color(0xffA3A3A3),
+          iconSize: 30,
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          items: const [
             BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined), label: 'Home'),
+              icon: Icon(Icons.home_outlined),
+              label: 'Home',
+              tooltip: 'Home',
+            ),
             BottomNavigationBarItem(
-                icon: Icon(Icons.group_outlined), label: 'Group'),
+                icon: Icon(Icons.group_outlined),
+                label: 'Group',
+                tooltip: 'Group'),
             BottomNavigationBarItem(
                 icon: Icon(Icons.notifications_outlined),
-                label: 'Notification'),
+                label: 'Notification',
+                tooltip: 'Notification'),
             BottomNavigationBarItem(
-                icon: Icon(Icons.), label: 'Settings'),
+              icon: Icon(Icons.tune),
+              label: 'Settings',
+              tooltip: 'Settings',
+            ),
           ],
         ),
       ),
