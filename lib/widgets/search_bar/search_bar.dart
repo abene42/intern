@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:intern/widgets/search_bar/search_controller.dart';
 
 class SearchBar extends StatefulWidget {
   const SearchBar({Key? key}) : super(key: key);
@@ -8,12 +10,11 @@ class SearchBar extends StatefulWidget {
 }
 
 class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
-  bool isSearching = false;
   late final Animation<double> height;
   late final Animation<double> opacity;
   late final Animation<EdgeInsets> textAlignment;
-  late AnimationController _controller;
-  late FocusNode _focusNode;
+  late AnimationController _animationController;
+  SearchController searchController = SearchController();
 
   @override
   void initState() {
@@ -21,19 +22,22 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
     super.initState();
 
     //Focus node for the text field
-    _focusNode = FocusNode();
+    searchController.focusNode = FocusNode();
+
+    // Controller for the text field
+    searchController.searchFieldController = TextEditingController();
 
     // Animation Controller
-    _controller = AnimationController(
+    _animationController = AnimationController(
         duration: const Duration(milliseconds: 800), vsync: this);
 
     // Height animation for the texts
     height = Tween<double>(
-      begin: 20,
+      begin: 0,
       end: 130,
     ).animate(
       CurvedAnimation(
-        parent: _controller,
+        parent: _animationController,
         curve: const Interval(
           0.0,
           0.400,
@@ -48,7 +52,7 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
       end: 1.0,
     ).animate(
       CurvedAnimation(
-        parent: _controller,
+        parent: _animationController,
         curve: const Interval(
           0.401,
           0.600,
@@ -59,11 +63,11 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
 
     // Alignment animation for the texts
     textAlignment = Tween<EdgeInsets>(
-      begin: const EdgeInsets.only(top: 52, left: 91),
-      end: const EdgeInsets.only(top: 52, left: 36),
+      begin: const EdgeInsets.only(left: 91),
+      end: const EdgeInsets.only(left: 36),
     ).animate(
       CurvedAnimation(
-        parent: _controller,
+        parent: _animationController,
         curve: const Interval(
           0.401,
           0.600,
@@ -77,18 +81,20 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    _controller.dispose();
-    _focusNode.dispose();
+    _animationController.dispose();
+    searchController.focusNode.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(animation: _controller, builder: _buildAnimation);
+    return AnimatedBuilder(
+        animation: _animationController, builder: _buildAnimation);
   }
 
   Widget _buildAnimation(BuildContext context, Widget? child) {
     return Stack(
       alignment: Alignment.topRight,
+      clipBehavior: Clip.antiAlias,
       children: [
         Container(
           decoration: BoxDecoration(
@@ -106,11 +112,12 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
             padding: textAlignment.value,
             height: height.value,
             width: 206,
+            margin: EdgeInsets.only(top: 22),
             decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.only(
-                topRight: Radius.circular(25),
-                topLeft: Radius.circular(25),
+                topRight: Radius.circular(0),
+                topLeft: Radius.circular(0),
                 bottomLeft: Radius.circular(15),
                 bottomRight: Radius.circular(15),
               ),
@@ -120,23 +127,31 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    '#Nearby',
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Color(0xffA3A3A3),
+                children: [
+                  InkWell(
+                    onTap: () => searchController.searchItemClicked(
+                        text: '#Nearby', controller: _animationController),
+                    child: const Text(
+                      '#Nearby',
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Color(0xffA3A3A3),
+                      ),
                     ),
                   ),
-                  Divider(
+                  const Divider(
                     endIndent: 35.5,
                     thickness: 1,
                   ),
-                  Text(
-                    '#Home',
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Color(0xffA3A3A3),
+                  InkWell(
+                    onTap: () => searchController.searchItemClicked(
+                        text: '#Home', controller: _animationController),
+                    child: const Text(
+                      '#Home',
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Color(0xffA3A3A3),
+                      ),
                     ),
                   )
                 ],
@@ -161,41 +176,45 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
                 borderRadius: BorderRadius.circular(40),
               ),
               child: TextFormField(
-                focusNode: _focusNode,
+                focusNode: searchController.focusNode,
+                controller: searchController.searchFieldController,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                   suffixIcon: IconButton(
-                    color: Color(0xffA3A3A3),
-                    icon: Icon(Icons.search),
-                    splashColor: Colors.transparent,
-                    splashRadius: 0.1,
-                    onPressed: () {
-                      isSearching
-                          ? _playAnimationReverse()
-                          : _playAnimationForward();
-                    },
-                  ),
+                      color: const Color(0xffA3A3A3),
+                      icon: const Icon(Icons.search),
+                      splashColor: Colors.transparent,
+                      splashRadius: 0.1,
+                      onPressed: () {
+                        searchController.isSearching.isTrue
+                            ? searchController.playAnimationReverse(
+                                focusNode: searchController.focusNode,
+                                controller: _animationController)
+                            : searchController.playAnimationForward(
+                                focusNode: searchController.focusNode,
+                                controller: _animationController);
+                      }),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(40),
-                    borderSide: BorderSide(color: Colors.white),
+                    borderSide: const BorderSide(color: Colors.white),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(40),
-                    borderSide: BorderSide(color: Colors.white),
+                    borderSide: const BorderSide(color: Colors.white),
                   ),
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(40),
-                    borderSide: BorderSide(color: Colors.white),
+                    borderSide: const BorderSide(color: Colors.white),
                   ),
                   focusedErrorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(40),
-                    borderSide: BorderSide(color: Colors.white),
+                    borderSide: const BorderSide(color: Colors.white),
                   ),
                   disabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(40),
-                    borderSide: BorderSide(color: Colors.white),
+                    borderSide: const BorderSide(color: Colors.white),
                   ),
                 ),
               ),
@@ -204,29 +223,5 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
         ),
       ],
     );
-  }
-
-  Future<void> _playAnimationForward() async {
-    try {
-      _focusNode.requestFocus();
-      await _controller.forward().orCancel;
-      setState(() {
-        isSearching = true;
-      });
-    } on TickerCanceled {
-      // the animation got canceled, probably because it was disposed of
-    }
-  }
-
-  Future<void> _playAnimationReverse() async {
-    try {
-      await _controller.reverse().orCancel;
-      setState(() {
-        isSearching = false;
-      });
-      _focusNode.unfocus();
-    } on TickerCanceled {
-      // the animation got canceled, probably because it was disposed of
-    }
   }
 }

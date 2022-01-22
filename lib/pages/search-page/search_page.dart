@@ -16,11 +16,16 @@ class _SearchPageState extends State<SearchPage> {
     return ColorfulSafeArea(
       color: Colors.white,
       child: Scaffold(
-        extendBody: true,
         backgroundColor: Colors.white,
         body: SingleChildScrollView(
-          child: Column(
+          child: Stack(
             children: [
+              Container(
+                color: Colors.pinkAccent,
+                width: Get.width,
+                height: Get.height,
+                // margin: EdgeInsets.only(top: 80),
+              ),
               Container(
                 width: Get.width,
                 padding: const EdgeInsets.only(right: 58, left: 58, top: 20),
