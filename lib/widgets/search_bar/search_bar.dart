@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:intern/widgets/search_bar/search_controller.dart';
+import 'package:intern/pages/search-page/search_page_controller.dart';
 
 class SearchBar extends StatefulWidget {
-  const SearchBar({Key? key}) : super(key: key);
+  final SearchPageController searchPageController;
+  const SearchBar({Key? key, required this.searchPageController})
+      : super(key: key);
 
   @override
   _SearchBarState createState() => _SearchBarState();
@@ -13,22 +14,20 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
   late final Animation<double> height;
   late final Animation<double> opacity;
   late final Animation<EdgeInsets> textAlignment;
-  late AnimationController _animationController;
-  SearchController searchController = SearchController();
-
+  late SearchPageController searchPageController = widget.searchPageController;
   @override
   void initState() {
     // TODO: implement initState
-    super.initState();
+    searchPageController = widget.searchPageController;
 
     //Focus node for the text field
-    searchController.focusNode = FocusNode();
+    searchPageController.focusNode = FocusNode();
 
     // Controller for the text field
-    searchController.searchFieldController = TextEditingController();
+    searchPageController.searchFieldController = TextEditingController();
 
     // Animation Controller
-    _animationController = AnimationController(
+    searchPageController.animationController = AnimationController(
         duration: const Duration(milliseconds: 800), vsync: this);
 
     // Height animation for the texts
@@ -37,7 +36,7 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
       end: 130,
     ).animate(
       CurvedAnimation(
-        parent: _animationController,
+        parent: searchPageController.animationController,
         curve: const Interval(
           0.0,
           0.400,
@@ -52,7 +51,7 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
       end: 1.0,
     ).animate(
       CurvedAnimation(
-        parent: _animationController,
+        parent: searchPageController.animationController,
         curve: const Interval(
           0.401,
           0.600,
@@ -67,7 +66,7 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
       end: const EdgeInsets.only(left: 36),
     ).animate(
       CurvedAnimation(
-        parent: _animationController,
+        parent: searchPageController.animationController,
         curve: const Interval(
           0.401,
           0.600,
@@ -75,20 +74,23 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
         ),
       ),
     );
+
+    super.initState();
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    _animationController.dispose();
-    searchController.focusNode.dispose();
+    searchPageController.animationController.dispose();
+    searchPageController.focusNode.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-        animation: _animationController, builder: _buildAnimation);
+        animation: searchPageController.animationController,
+        builder: _buildAnimation);
   }
 
   Widget _buildAnimation(BuildContext context, Widget? child) {
@@ -112,7 +114,7 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
             padding: textAlignment.value,
             height: height.value,
             width: 206,
-            margin: EdgeInsets.only(top: 22),
+            margin: const EdgeInsets.only(top: 22),
             decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.only(
@@ -129,8 +131,8 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   InkWell(
-                    onTap: () => searchController.searchItemClicked(
-                        text: '#Nearby', controller: _animationController),
+                    onTap: () =>
+                        searchPageController.searchItemClicked(text: '#Nearby'),
                     child: const Text(
                       '#Nearby',
                       style: TextStyle(
@@ -144,8 +146,8 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
                     thickness: 1,
                   ),
                   InkWell(
-                    onTap: () => searchController.searchItemClicked(
-                        text: '#Home', controller: _animationController),
+                    onTap: () =>
+                        searchPageController.searchItemClicked(text: '#Home'),
                     child: const Text(
                       '#Home',
                       style: TextStyle(
@@ -175,46 +177,49 @@ class _SearchBarState extends State<SearchBar> with TickerProviderStateMixin {
                 ],
                 borderRadius: BorderRadius.circular(40),
               ),
-              child: TextFormField(
-                focusNode: searchController.focusNode,
-                controller: searchController.searchFieldController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                  suffixIcon: IconButton(
-                      color: const Color(0xffA3A3A3),
-                      icon: const Icon(Icons.search),
-                      splashColor: Colors.transparent,
-                      splashRadius: 0.1,
-                      onPressed: () {
-                        searchController.isSearching.isTrue
-                            ? searchController.playAnimationReverse(
-                                focusNode: searchController.focusNode,
-                                controller: _animationController)
-                            : searchController.playAnimationForward(
-                                focusNode: searchController.focusNode,
-                                controller: _animationController);
-                      }),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(40),
-                    borderSide: const BorderSide(color: Colors.white),
+              child: Focus(
+                onFocusChange: (focus) => focus
+                    ? searchPageController.playAnimationForward()
+                    : searchPageController.playAnimationReverse(),
+                child: TextFormField(
+                  focusNode: searchPageController.focusNode,
+                  controller: searchPageController.searchFieldController,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xffA3A3A3),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(40),
-                    borderSide: const BorderSide(color: Colors.white),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(40),
-                    borderSide: const BorderSide(color: Colors.white),
-                  ),
-                  focusedErrorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(40),
-                    borderSide: const BorderSide(color: Colors.white),
-                  ),
-                  disabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(40),
-                    borderSide: const BorderSide(color: Colors.white),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                    suffixIcon: IconButton(
+                        color: const Color(0xffA3A3A3),
+                        icon: const Icon(Icons.search),
+                        splashColor: Colors.transparent,
+                        splashRadius: 0.1,
+                        onPressed: () {
+                          searchPageController.toggleIsSearching();
+                        }),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(40),
+                      borderSide: const BorderSide(color: Colors.white),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(40),
+                      borderSide: const BorderSide(color: Colors.white),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(40),
+                      borderSide: const BorderSide(color: Colors.white),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(40),
+                      borderSide: const BorderSide(color: Colors.white),
+                    ),
+                    disabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(40),
+                      borderSide: const BorderSide(color: Colors.white),
+                    ),
                   ),
                 ),
               ),
