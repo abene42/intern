@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:intern/pages/profile/profile_page.dart';
 import 'package:intern/pages/search-page/search_page.dart';
 
 void main() {
@@ -26,6 +27,10 @@ class MyApp extends StatelessWidget {
       ),
       home: SearchPage(),
       debugShowCheckedModeBanner: false,
+      getPages: [
+        GetPage(name: '/searchPage', page: () => const SearchPage()),
+        GetPage(name: '/profilePage', page: () => const ProfilePage())
+      ],
     );
   }
 }

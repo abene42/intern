@@ -3,9 +3,14 @@ import 'package:flutter/material.dart';
 class ProfilePhotoAvatar extends StatelessWidget {
   final String imageUrl;
   List<Color> colors;
+  final double? radius;
 
-  ProfilePhotoAvatar({Key? key, required this.imageUrl, required this.colors})
-      : super(key: key);
+  ProfilePhotoAvatar({
+    Key? key,
+    required this.imageUrl,
+    required this.colors,
+    this.radius,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +26,7 @@ class ProfilePhotoAvatar extends StatelessWidget {
       ),
       child: CircleAvatar(
         backgroundImage: AssetImage(imageUrl),
-        radius: 22,
+        radius: radius ?? 22,
       ),
     );
   }

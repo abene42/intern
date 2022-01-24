@@ -47,12 +47,15 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
                 children: [
                   Row(
                     children: [
-                      ProfilePhotoAvatar(
-                        imageUrl: 'assets/images/person_placeholder.png',
-                        colors: const [
-                          Colors.purpleAccent,
-                          Colors.red,
-                        ],
+                      InkWell(
+                        child: ProfilePhotoAvatar(
+                          imageUrl: 'assets/images/person_placeholder.png',
+                          colors: const [
+                            Colors.purpleAccent,
+                            Colors.red,
+                          ],
+                        ),
+                        onTap: () => Get.toNamed('profilePage'),
                       ),
                     ],
                   ),
